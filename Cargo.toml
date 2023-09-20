@@ -3,8 +3,10 @@ name = "dwrite_rs"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-anyhow = "1.0.75"
+[dependencies.anyhow]
+version = "1.0.75"
+# pwsh: `$Env:RUST_BACKTRACE=1`
+features = ["backtrace"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
