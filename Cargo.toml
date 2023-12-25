@@ -3,6 +3,10 @@ name = "dwrite_rs"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+bitflags = "2.4.1"
+gdi_rs = {git = "https://github.com/hzuika/gdi_rs.git", branch = "main"}
+
 [dependencies.anyhow]
 version = "1.0.75"
 # pwsh: `$Env:RUST_BACKTRACE=1`
@@ -15,4 +19,5 @@ version = "0.51.1"
 features = [
     "Win32_Graphics_DirectWrite",
     "Win32_Foundation",
+    "Win32_Graphics_Gdi",
 ]
