@@ -2,7 +2,7 @@ use bitflags::bitflags;
 use windows::Win32::{
     Foundation::BOOL,
     Graphics::DirectWrite::{
-        IDWriteFont, IDWriteLocalizedStrings, DWRITE_FONT_SIMULATIONS,
+        IDWriteFont, IDWriteFontFamily, IDWriteLocalizedStrings, DWRITE_FONT_SIMULATIONS,
         DWRITE_FONT_SIMULATIONS_BOLD, DWRITE_FONT_SIMULATIONS_NONE,
         DWRITE_FONT_SIMULATIONS_OBLIQUE, DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE,
         DWRITE_INFORMATIONAL_STRING_DESCRIPTION, DWRITE_INFORMATIONAL_STRING_DESIGNER,
@@ -28,7 +28,7 @@ use windows::Win32::{
     },
 };
 
-use crate::localized_strings::LocalizedStrings;
+use crate::{font_family::FontFamily, localized_strings::LocalizedStrings};
 
 pub fn get_simulations(font: &IDWriteFont) -> DWRITE_FONT_SIMULATIONS {
     unsafe { font.GetSimulations() }
@@ -51,6 +51,13 @@ pub fn get_informational_strings(
         Ok(strings)
     } else {
         Ok(None)
+    }
+}
+
+pub fn get_font_family(font: &IDWriteFont) -> anyhow::Result<IDWriteFontFamily> {
+    unsafe {
+        let family = font.GetFontFamily()?;
+        Ok(family)
     }
 }
 
@@ -95,6 +102,10 @@ pub enum InformationalStringId {
 pub struct Font(pub IDWriteFont);
 
 impl Font {
+    pub fn get_font_family(&self) -> anyhow::Result<FontFamily> {
+        get_font_family(&self.0).map(FontFamily)
+    }
+
     pub fn get_simulations(&self) -> Simulations {
         Simulations::from_bits_retain(get_simulations(&self.0).0)
     }
