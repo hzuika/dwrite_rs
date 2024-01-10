@@ -1,10 +1,14 @@
+use core::fmt;
+
 use bitflags::bitflags;
 use windows::Win32::{
     Foundation::BOOL,
     Graphics::DirectWrite::{
         IDWriteFont, IDWriteFontFamily, IDWriteLocalizedStrings, DWRITE_FONT_SIMULATIONS,
         DWRITE_FONT_SIMULATIONS_BOLD, DWRITE_FONT_SIMULATIONS_NONE,
-        DWRITE_FONT_SIMULATIONS_OBLIQUE, DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE,
+        DWRITE_FONT_SIMULATIONS_OBLIQUE, DWRITE_FONT_STRETCH, DWRITE_FONT_STYLE,
+        DWRITE_FONT_STYLE_ITALIC, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STYLE_OBLIQUE,
+        DWRITE_FONT_WEIGHT, DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE,
         DWRITE_INFORMATIONAL_STRING_DESCRIPTION, DWRITE_INFORMATIONAL_STRING_DESIGNER,
         DWRITE_INFORMATIONAL_STRING_DESIGNER_URL,
         DWRITE_INFORMATIONAL_STRING_DESIGN_SCRIPT_LANGUAGE_TAG,
@@ -61,6 +65,124 @@ pub fn get_font_family(font: &IDWriteFont) -> anyhow::Result<IDWriteFontFamily> 
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Weight(pub i32);
+
+impl fmt::Display for Weight {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self.0 {
+            100 => "Thin".to_string(),
+            200 => "ExtraLight".to_string(),
+            300 => "Light".to_string(),
+            350 => "SemiLight".to_string(),
+            400 => "Regular".to_string(),
+            500 => "Medium".to_string(),
+            600 => "SemiBold".to_string(),
+            700 => "Bold".to_string(),
+            800 => "ExtraBold".to_string(),
+            900 => "Black".to_string(),
+            950 => "ExtraBlack".to_string(),
+            _ => self.0.to_string(),
+        };
+        write!(f, "{}", s)
+    }
+}
+
+impl From<DWRITE_FONT_WEIGHT> for Weight {
+    fn from(value: DWRITE_FONT_WEIGHT) -> Self {
+        Self(value.0)
+    }
+}
+
+pub fn get_weight(font: &IDWriteFont) -> DWRITE_FONT_WEIGHT {
+    unsafe { font.GetWeight() }
+}
+
+pub enum Style {
+    Normal,
+    Oblique,
+    Italic,
+}
+
+impl fmt::Display for Style {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Italic => "Italic",
+            Self::Normal => "Normal",
+            Self::Oblique => "Oblique",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+impl From<DWRITE_FONT_STYLE> for Style {
+    fn from(value: DWRITE_FONT_STYLE) -> Self {
+        match value {
+            DWRITE_FONT_STYLE_ITALIC => Self::Italic,
+            DWRITE_FONT_STYLE_NORMAL => Self::Normal,
+            DWRITE_FONT_STYLE_OBLIQUE => Self::Oblique,
+            _ => panic!("invalid style"),
+        }
+    }
+}
+
+pub fn get_style(font: &IDWriteFont) -> DWRITE_FONT_STYLE {
+    unsafe { font.GetStyle() }
+}
+
+pub enum Stretch {
+    Undefined = 0,
+    UltraCondensed = 1,
+    ExtraCondensed = 2,
+    Condensed = 3,
+    SemiCondensed = 4,
+    Normal = 5,
+    SemiExpanded = 6,
+    Expanded = 7,
+    ExtraExpanded = 8,
+    UltraExpanded = 9,
+}
+
+impl fmt::Display for Stretch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Stretch::Undefined => "Undefined",
+            Stretch::UltraCondensed => "UltraCondensed",
+            Stretch::ExtraCondensed => "ExtraCondensed",
+            Stretch::Condensed => "Condensed",
+            Stretch::SemiCondensed => "SemiCondensed",
+            Stretch::Normal => "Normal",
+            Stretch::SemiExpanded => "SemiExpanded",
+            Stretch::Expanded => "Expanded",
+            Stretch::ExtraExpanded => "ExtraExpanded",
+            Stretch::UltraExpanded => "UltraExpanded",
+        };
+        write!(f, "{}", s)
+    }
+}
+
+impl From<DWRITE_FONT_STRETCH> for Stretch {
+    fn from(value: DWRITE_FONT_STRETCH) -> Self {
+        match value.0 {
+            0 => Stretch::Undefined,
+            1 => Stretch::UltraCondensed,
+            2 => Stretch::ExtraCondensed,
+            3 => Stretch::Condensed,
+            4 => Stretch::SemiCondensed,
+            5 => Stretch::Normal,
+            6 => Stretch::SemiExpanded,
+            7 => Stretch::Expanded,
+            8 => Stretch::ExtraExpanded,
+            9 => Stretch::UltraExpanded,
+            _ => panic!("invalid stretch"),
+        }
+    }
+}
+
+pub fn get_stretch(font: &IDWriteFont) -> DWRITE_FONT_STRETCH {
+    unsafe { font.GetStretch() }
+}
+
 bitflags! {
     #[repr(transparent)]
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -108,6 +230,18 @@ impl Font {
 
     pub fn get_simulations(&self) -> Simulations {
         Simulations::from_bits_retain(get_simulations(&self.0).0)
+    }
+
+    pub fn get_weight(&self) -> Weight {
+        get_weight(&self.0).into()
+    }
+
+    pub fn get_style(&self) -> Style {
+        get_style(&self.0).into()
+    }
+
+    pub fn get_stretch(&self) -> Stretch {
+        get_stretch(&self.0).into()
     }
 
     pub fn get_face_names(&self) -> anyhow::Result<LocalizedStrings> {
