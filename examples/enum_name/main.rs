@@ -36,8 +36,11 @@ fn main() -> anyhow::Result<()> {
         "Win32 family",
         "Win32 Subfamily",
         "lfFaceName",
+        "lfWeight",
+        "lfItalic",
         "Weight",
-        "Italic",
+        "Style",
+        "Stretch",
         "Typographic family",
         "Typographic subfamily",
         "Preferred family",
@@ -77,8 +80,12 @@ fn main() -> anyhow::Result<()> {
 
             let (logfont, _) = interop.convert_font_to_logfont(&font)?;
             let lf_facename = UTF16String(logfont.lfFaceName).to_string();
-            let weight = logfont.lfWeight;
-            let italic = logfont.lfItalic != 0;
+            let lf_weight = logfont.lfWeight;
+            let lf_italic = logfont.lfItalic != 0;
+
+            let weight = font.get_weight();
+            let style = font.get_style();
+            let stretch = font.get_stretch();
 
             writeln!(
                 &mut file,
@@ -90,8 +97,11 @@ fn main() -> anyhow::Result<()> {
                     win32_family_name,
                     win32_subfamily_name,
                     lf_facename,
+                    lf_weight.to_string(),
+                    lf_italic.to_string(),
                     weight.to_string(),
-                    italic.to_string(),
+                    style.to_string(),
+                    stretch.to_string(),
                     typographic_family_name,
                     typographic_subfamily_name,
                     preferred_family_name,
