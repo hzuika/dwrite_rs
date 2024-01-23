@@ -4,8 +4,8 @@ use bitflags::bitflags;
 use windows::Win32::{
     Foundation::BOOL,
     Graphics::DirectWrite::{
-        IDWriteFont, IDWriteFontFamily, IDWriteLocalizedStrings, DWRITE_FONT_SIMULATIONS,
-        DWRITE_FONT_SIMULATIONS_BOLD, DWRITE_FONT_SIMULATIONS_NONE,
+        IDWriteFont, IDWriteFontFace, IDWriteFontFamily, IDWriteLocalizedStrings,
+        DWRITE_FONT_SIMULATIONS, DWRITE_FONT_SIMULATIONS_BOLD, DWRITE_FONT_SIMULATIONS_NONE,
         DWRITE_FONT_SIMULATIONS_OBLIQUE, DWRITE_FONT_STRETCH, DWRITE_FONT_STYLE,
         DWRITE_FONT_STYLE_ITALIC, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STYLE_OBLIQUE,
         DWRITE_FONT_WEIGHT, DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE,
@@ -32,7 +32,7 @@ use windows::Win32::{
     },
 };
 
-use crate::{font_family::FontFamily, localized_strings::LocalizedStrings};
+use crate::{font_face, font_family::FontFamily, localized_strings::LocalizedStrings};
 
 pub fn get_simulations(font: &IDWriteFont) -> DWRITE_FONT_SIMULATIONS {
     unsafe { font.GetSimulations() }
@@ -221,6 +221,16 @@ pub enum InformationalStringId {
     WwsFamilyName,
 }
 
+pub fn create_font_face(font: &IDWriteFont) -> anyhow::Result<IDWriteFontFace> {
+    let face = unsafe { font.CreateFontFace() }?;
+    Ok(face)
+}
+
+pub fn get_filepath(font: &IDWriteFont) -> anyhow::Result<String> {
+    let face = create_font_face(font)?;
+    font_face::get_filepath(&face)
+}
+
 pub struct Font(pub IDWriteFont);
 
 impl Font {
@@ -302,5 +312,9 @@ impl Font {
             InformationalStringId::WwsFamilyName => DWRITE_INFORMATIONAL_STRING_WWS_FAMILY_NAME,
         };
         Ok(get_informational_strings(&self.0, informational_string_id)?.map(LocalizedStrings))
+    }
+
+    pub fn get_filepath(&self) -> anyhow::Result<String> {
+        get_filepath(&self.0)
     }
 }
