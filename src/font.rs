@@ -38,6 +38,10 @@ pub fn get_simulations(font: &IDWriteFont) -> DWRITE_FONT_SIMULATIONS {
     unsafe { font.GetSimulations() }
 }
 
+pub fn is_simulation(font: &IDWriteFont) -> bool {
+    get_simulations(font) != DWRITE_FONT_SIMULATIONS_NONE
+}
+
 pub fn get_face_names(font: &IDWriteFont) -> anyhow::Result<IDWriteLocalizedStrings> {
     unsafe { Ok(font.GetFaceNames()?) }
 }
@@ -234,6 +238,11 @@ pub fn get_filepath(font: &IDWriteFont) -> anyhow::Result<String> {
     font_face::get_filepath(&face)
 }
 
+pub fn is_variable_font(font: &IDWriteFont) -> anyhow::Result<bool> {
+    let face = create_font_face(font)?;
+    font_face::is_variable_font(&face)
+}
+
 pub struct Font(pub IDWriteFont);
 
 impl Font {
@@ -319,5 +328,13 @@ impl Font {
 
     pub fn get_filepath(&self) -> anyhow::Result<String> {
         get_filepath(&self.0)
+    }
+
+    pub fn is_simulation(&self) -> bool {
+        is_simulation(&self.0)
+    }
+
+    pub fn is_variable_font(&self) -> anyhow::Result<bool> {
+        is_variable_font(&self.0)
     }
 }
