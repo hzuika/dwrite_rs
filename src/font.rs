@@ -98,6 +98,7 @@ pub fn get_weight(font: &IDWriteFont) -> DWRITE_FONT_WEIGHT {
     unsafe { font.GetWeight() }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Style {
     Normal,
     Oblique,
@@ -130,6 +131,7 @@ pub fn get_style(font: &IDWriteFont) -> DWRITE_FONT_STYLE {
     unsafe { font.GetStyle() }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Stretch {
     Undefined = 0,
     UltraCondensed = 1,
@@ -193,6 +195,7 @@ bitflags! {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum InformationalStringId {
     None,
     CopyrightNotice,

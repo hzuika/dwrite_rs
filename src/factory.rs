@@ -8,6 +8,7 @@ use crate::{font_collection::FontCollection, gdi_interop::GdiInterop};
 
 pub struct Factory(pub IDWriteFactory);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FactoryType {
     Isolated,
     Shared,
