@@ -1,3 +1,5 @@
+use core::fmt;
+
 use windows::{
     core::{HSTRING, PCWSTR},
     Win32::{Foundation::BOOL, Graphics::DirectWrite::IDWriteLocalizedStrings},
@@ -65,6 +67,49 @@ impl LocalizedStrings {
     }
 }
 
+pub struct LocalizedStringsIter<'a> {
+    strings: &'a LocalizedStrings,
+    index: usize,
+}
+
+impl<'a> Iterator for LocalizedStringsIter<'a> {
+    type Item = LocalizedString;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.len() {
+            let string = LocalizedString::from(&self.strings.0, self.index as u32);
+            self.index += 1;
+            match string {
+                Ok(string) => Some(string),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    assert!(false);
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> ExactSizeIterator for LocalizedStringsIter<'a> {
+    #[inline]
+    fn len(&self) -> usize {
+        self.strings.get_count() as usize
+    }
+}
+
+impl<'a> IntoIterator for &'a LocalizedStrings {
+    type Item = LocalizedString;
+    type IntoIter = LocalizedStringsIter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            strings: self,
+            index: 0,
+        }
+    }
+}
+
 // IDWriteLocalizedStrings に含まれるロケール文字列一つ分を表す構造体．
 pub struct LocalizedString {
     pub string: String,
@@ -78,8 +123,10 @@ impl LocalizedString {
             locale: get_locale_name(strings, index)?,
         })
     }
+}
 
-    pub fn to_string(&self) -> String {
-        format!("{} ({})", self.string, self.locale)
+impl fmt::Display for LocalizedString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ({})", self.string, self.locale)
     }
 }
