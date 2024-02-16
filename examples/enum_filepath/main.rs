@@ -1,11 +1,11 @@
-use dwrite_rs::{factory::Factory, font::Simulations};
+use dwrite_rs::factory::{Factory, FactoryType};
 
 fn main() -> anyhow::Result<()> {
-    let factory = Factory::new(dwrite_rs::factory::FactoryType::Shared)?;
+    let factory = Factory::new(FactoryType::Shared)?;
     let collection = factory.get_system_font_collection(true)?;
     for family in &collection {
         for font in &family {
-            if font.get_simulations() != Simulations::None {
+            if font.is_simulation() {
                 continue;
             }
 
