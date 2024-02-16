@@ -1,1 +1,1 @@
-DirectWrite (DWrite) を Rust から使う．
+DirectWrite (DWrite) を Rust から使うサンプル．
