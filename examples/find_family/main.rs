@@ -8,5 +8,10 @@ fn main() -> anyhow::Result<()> {
     for family_name in &family_names {
         println!("{}", family_name);
     }
+    let family = collection.find_family("MS PGothic").unwrap();
+    let family_names = family.get_family_names()?;
+    for family_name in &family_names {
+        println!("{}", family_name);
+    }
     Ok(())
 }
