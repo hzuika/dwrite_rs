@@ -1,8 +1,11 @@
 use std::os::raw::c_void;
 
-use windows::Win32::Graphics::DirectWrite::{IDWriteFontFile, IDWriteFontFileLoader};
+use windows::{
+    core::Interface,
+    Win32::Graphics::DirectWrite::{IDWriteFontFile, IDWriteFontFileLoader},
+};
 
-use crate::{font_file_loader::get_local, local_font_file_loader::get_file_path_from_key};
+use crate::local_font_file_loader::get_file_path_from_key;
 
 pub fn get_reference_key(file: &IDWriteFontFile) -> anyhow::Result<(*const c_void, u32)> {
     // GetReferenceKey には初期化されていないポインタを渡すことができる．
@@ -20,6 +23,5 @@ pub fn get_loader(file: &IDWriteFontFile) -> anyhow::Result<IDWriteFontFileLoade
 pub fn get_filepath(file: &IDWriteFontFile) -> anyhow::Result<String> {
     let (key, size) = get_reference_key(file)?;
     let loader = get_loader(file)?;
-    let loader = get_local(&loader)?;
-    get_file_path_from_key(&loader, key, size)
+    get_file_path_from_key(&loader.cast()?, key, size)
 }

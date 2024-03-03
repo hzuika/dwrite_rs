@@ -4,7 +4,6 @@ pub mod font_collection;
 pub mod font_face;
 pub mod font_family;
 pub mod font_file;
-pub mod font_file_loader;
 pub mod gdi_interop;
 pub mod local_font_file_loader;
 pub mod localized_strings;
